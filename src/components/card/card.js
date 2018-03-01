@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     flex: 1,
     backgroundColor: '#FA5F5C',
-    borderRadius: 40,
+    borderRadius: 20,
     shadowColor: '#6F6F6F',
     shadowOffset: { width: 0, height: 11 },
     shadowOpacity: 0.3,
@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
     left: 0,
     width: '100%',
     height: '100%',
-    borderRadius: 40,
+    borderRadius: 20,
     overflow: 'hidden',
   },
   bgImage: {

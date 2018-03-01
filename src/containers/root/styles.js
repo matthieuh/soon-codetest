@@ -11,7 +11,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
   },
   h1: {
-    fontSize: 40,
+    fontSize: 36,
+    marginLeft: 20,
   },
   actions: {
     flexDirection: 'row',
