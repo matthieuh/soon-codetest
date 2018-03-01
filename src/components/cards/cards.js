@@ -11,28 +11,29 @@ import styles from './styles';
 
 const { height, width } = Dimensions.get('window');
 
-const SWIPE_THRESHOLD = 80;
-
 class Cards extends Component {
   static propTypes = {
     data: PropTypes.arrayOf(PropTypes.object),
     renderCard: PropTypes.func.isRequired,
+    onSwipeLeft: PropTypes.func,
+    onSwipeRight: PropTypes.func,
+    onSwipe: PropTypes.func,
   };
   static defaultProps = {
     data: [],
+    onSwipeLeft: () => {},
+    onSwipeRight: () => {},
+    onSwipe: () => {},
   };
 
-  static getSwipeDirection(animatedValueX, animatedValueY) {
-    const isSwipingLeft = animatedValueX < -width / 4;
-    const isSwipingRight = animatedValueX > width / 4;
-    const isSwipingTop = animatedValueY < -(height / 5);
-    const isSwipingBottom = animatedValueY > height / 5;
+  static getSwipeDirection(animatedValueX = 0) {
+    const limit = width / 4;
+    const isSwipingLeft = animatedValueX < -limit;
+    const isSwipingRight = animatedValueX > limit;
 
     return {
       isSwipingLeft,
       isSwipingRight,
-      isSwipingTop,
-      isSwipingBottom,
     };
   }
 
@@ -101,13 +102,19 @@ class Cards extends Component {
     const isSwiping = animatedValueX > width / 4 || animatedValueY > height / 5;
 
     if (isSwiping && this.validPanResponderRelease()) {
+      const onSwipeDirectionCallback = this.getOnSwipeDirectionCallback(this.animatedValueX);
       this.setState({ panResponderLocked: true }, () => {
-        this.swipeCard();
+        this.swipeCard(onSwipeDirectionCallback);
         this.zoomNextCard();
       });
     } else {
       this.resetTopCard();
     }
+  };
+
+  onSwipeCallbacks = (swipeDirectionCallback) => {
+    this.props.onSwipe(this.state.currentCard);
+    swipeDirectionCallback(this.state.currentCard);
   };
 
   setNextCard = (newCard) => {
@@ -120,7 +127,20 @@ class Cards extends Component {
     );
   };
 
-  incrementCardIndex = () => {
+  getOnSwipeDirectionCallback = (animatedValueX) => {
+    const { onSwipeLeft, onSwipeRight } = this.props;
+    const { isSwipingLeft, isSwipingRight } = Cards.getSwipeDirection(animatedValueX);
+
+    if (isSwipingRight) {
+      return onSwipeRight;
+    }
+
+    if (isSwipingLeft) {
+      return onSwipeLeft;
+    }
+  };
+
+  incrementCardIndex = (onSwipe) => {
     const { currentCard } = this.state;
     let newCard = currentCard + 1;
 
@@ -128,10 +148,11 @@ class Cards extends Component {
       newCard = 0;
     }
 
+    this.onSwipeCallbacks(onSwipe);
     this.setNextCard(newCard);
   };
 
-  swipeCard = (x = this.animatedValueX, y = this.animatedValueY) => {
+  swipeCard = (onSwipe, x = this.animatedValueX, y = this.animatedValueY) => {
     Animated.timing(this.state.pan, {
       toValue: {
         x: x * 4.5,
@@ -139,12 +160,11 @@ class Cards extends Component {
       },
       duration: 350,
     }).start(() => {
-      this.incrementCardIndex();
+      this.incrementCardIndex(onSwipe);
     });
   };
 
   resetTopCard = (cb) => {
-    console.log('resetTopCard');
     Animated.spring(this.state.pan, {
       toValue: 0,
     }).start(cb);
@@ -213,6 +233,11 @@ class Cards extends Component {
       outputRange: ['-10deg', '0deg', '10deg'],
     });
 
+  setCardSize = ({ nativeEvent }) => {
+    const { width: cardSize } = nativeEvent.layout;
+    this.setState({ cardSize });
+  };
+
   calculateSwipableCardStyle = () => {
     const opacity = this.props.animateCardOpacity ? this.interpolateCardOpacity() : 1;
     const rotation = this.interpolateRotation();
@@ -232,34 +257,36 @@ class Cards extends Component {
   };
 
   renderMainCard() {
-    const { data, renderCard } = this.props;
+    const { data, renderCard, style } = this.props;
     const { currentCard } = this.state;
 
-    const cardData = data[currentCard];
-
-    console.log('renderMainCard', cardData);
+    const index = currentCard;
+    const cardContent = data[index];
+    const card = renderCard({ index, data: cardContent });
 
     return (
       <Animated.View
-        style={[styles.card, this.calculateSwipableCardStyle()]}
+        style={[styles.card, style, this.calculateSwipableCardStyle()]}
         {...this.panResponder.panHandlers}
       >
-        {renderCard(cardData)}
+        {null}
+        {card}
       </Animated.View>
     );
   }
 
   renderNextCard() {
-    const { data, renderCard } = this.props;
+    const { data, renderCard, style } = this.props;
     const { currentCard, fadeAnim } = this.state;
 
-    const cardData = data[currentCard + 1];
-
-    console.log('renderNextCard', cardData);
+    const index = currentCard + 1;
+    const cardContent = data[index];
+    const card = renderCard({ index, data: cardContent });
 
     return (
-      <Animated.View style={[styles.card, { opacity: fadeAnim, zIndex: 1 }]}>
-        {renderCard(cardData)}
+      <Animated.View style={[styles.card, style, { opacity: fadeAnim, zIndex: 1 }]}>
+        {null}
+        {card}
       </Animated.View>
     );
   }
@@ -268,14 +295,13 @@ class Cards extends Component {
     const { data, renderCard, ...rest } = this.props;
 
     return (
-      <View style={styles.container} {...rest}>
+      <View
+        onLayout={this.setCardSize}
+        style={[styles.container, { height: this.state.cardSize }]}
+        {...rest}
+      >
         {data.length > 0 && (
-          <View
-            config={{
-              velocityThreshold: 0.3,
-              directionalOffsetThreshold: SWIPE_THRESHOLD,
-            }}
-          >
+          <View style={{ flex: 1 }}>
             {this.renderNextCard()}
             {this.renderMainCard()}
           </View>

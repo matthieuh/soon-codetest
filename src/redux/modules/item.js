@@ -1,7 +1,13 @@
 import { handleActions, createAction } from 'redux-actions';
 import itemsData from '../../../data/items.json';
 
+// Simulate async HTTP call
+async function wait(ttw = 500) {
+  await new Promise(resolve => setTimeout(resolve, ttw));
+}
+
 // Actions
+export const setCurrentItem = createAction('SET_CURRENT');
 export const like = createAction('LIKE');
 export const dislike = createAction('DISLIKE');
 export const done = createAction('DONE');
@@ -9,10 +15,6 @@ export const done = createAction('DONE');
 const FETCH_REQUEST = 'item/FETCH_REQUEST';
 const FETCH_RECEIVE = 'item/FETCH_RECEIVE';
 const FETCH_FAILURE = 'item/FETCH_FAILURE';
-
-async function wait(ttw = 500) {
-  await new Promise(resolve => setTimeout(resolve, ttw));
-}
 
 export const fetchItems = () => async (dispatch) => {
   dispatch({ type: FETCH_REQUEST });
@@ -30,6 +32,7 @@ const initialState = {
   items: [],
   loading: false,
   error: false,
+  current: 0,
 };
 
 // Reducers
@@ -52,20 +55,26 @@ export default handleActions(
       loading: false,
       error: action.error,
     }),
+    SET_CURRENT: (state, action) => ({
+      ...state,
+      current: action.payload,
+    }),
     LIKE: (state, action) => ({
       ...state,
-      items: state.items.map(item => (item.id === action.id ? { ...item, liked: true } : item)),
+      items: state.items.map((item, idx) => (idx === action.payload ? { ...item, liked: true } : item)),
     }),
     DISLIKE: (state, action) => ({
       ...state,
-      items: state.items.map(item => (item.id === action.id ? { ...item, liked: false } : item)),
+      items: state.items.map((item, idx) => (idx === action.payload ? { ...item, liked: false } : item)),
     }),
     DONE: (state, action) => ({
       ...state,
-      items: state.items.map(item => (item.id === action.id ? { ...item, skipped: true } : item)),
+      items: state.items.map((item, idx) => (idx === action.payload ? { ...item, skipped: true } : item)),
     }),
   },
   initialState,
 );
 
+// Selectors
 export const getItems = ({ item }) => item.items;
+export const getCurrentItem = ({ item }) => item.current;

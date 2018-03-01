@@ -1,13 +1,28 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, Text, Image } from 'react-native';
+import { View, Text } from 'react-native';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import SafeAreaView from 'react-native-safe-area-view';
-import { fetchItems, getItems } from '../../redux/modules/item';
+
+import {
+  fetchItems,
+  getItems,
+  getCurrentItem,
+  setCurrentItem,
+  like,
+  dislike,
+  done,
+} from '../../redux/modules/item';
+
 import Cards from '../../components/cards';
+import Card from '../../components/card';
+import CircleButton from '../../components/circle-button';
 
 import styles from './styles';
+import dislikeIcon from '../../assets/dislike.png';
+import doneIcon from '../../assets/done.png';
+import likeIcon from '../../assets/like.png';
 
 const cardPropTypes = PropTypes.shape({
   title: PropTypes.string,
@@ -17,14 +32,26 @@ const cardPropTypes = PropTypes.shape({
 
 const mapStateToProps = state => ({
   items: getItems(state),
+  currentItem: getCurrentItem(state),
 });
 
-const mapDispatchToProps = dispatch => bindActionCreators({ fetchItems }, dispatch);
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(
+    {
+      fetchItems,
+      setCurrentItem,
+      like,
+      dislike,
+      done,
+    },
+    dispatch,
+  );
 
 class Root extends Component {
   static propTypes = {
     fetchItems: PropTypes.func.isRequired,
     items: PropTypes.arrayOf(cardPropTypes),
+    currentItem: PropTypes.number.isRequired,
   };
   static defaultProps = {
     items: [],
@@ -34,32 +61,36 @@ class Root extends Component {
     this.props.fetchItems();
   }
 
-  renderCard = card => (
-    <View style={styles.card}>
-      <View
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-        }}
-      >
-        <Image style={styles.cardBgImage} resizeMode="contain" source={{ uri: card.image }} />
-      </View>
-      <View style={styles.cardContent}>
-        <Text style={styles.cardText}>Title: {card.title}</Text>
-        <Text style={styles.cardText}>Description: {card.description}</Text>
-      </View>
+  action = actionType => () => this.props[actionType](this.props.currentItem);
+
+  renderActions = () => (
+    <View style={styles.actions}>
+      <CircleButton icon={dislikeIcon} style={styles.action} onPress={this.action('dislike')} />
+      <CircleButton icon={doneIcon} style={styles.action} small onPress={this.action('done')} />
+      <CircleButton icon={likeIcon} style={styles.action} onPress={this.action('like')} />
     </View>
   );
 
   render() {
-    const { items } = this.props;
+    const { items, currentItem } = this.props;
     return (
       <View style={styles.container}>
-        <SafeAreaView>
-          <Cards data={items} renderCard={this.renderCard} />
+        <SafeAreaView style={styles.content}>
+          <Text style={styles.h1}>Explore</Text>
+          <Cards
+            data={items}
+            onSwipe={this.props.setCurrentItem}
+            onSwipeRight={() => this.action('done')}
+            renderCard={({ data, index }) => (
+              <Card
+                idx={index}
+                title={data.title}
+                description={data.description}
+                bgImage={data.image}
+              />
+            )}
+          />
+          {this.renderActions()}
         </SafeAreaView>
       </View>
     );

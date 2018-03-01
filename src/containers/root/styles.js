@@ -1,34 +1,22 @@
-import { StyleSheet, Dimensions } from 'react-native';
-
-const { width } = Dimensions.get('window');
+import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-    padding: 40,
+    padding: 30,
   },
-  card: {
-    elevation: 3,
+  content: {
     flex: 1,
-    backgroundColor: '#FA5F5C',
-    width: width - 80,
-    height: width - 80,
-    borderRadius: 40,
-    // overflow: 'hidden',
-    shadowColor: '#6F6F6F',
-    shadowOffset: { width: 0, height: 11 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
+    justifyContent: 'space-around',
   },
-  cardBgImage: {
-    flex: 1,
+  h1: {
+    fontSize: 40,
   },
-  cardContent: {
-    padding: 40,
-  },
-  cardText: {
-    color: 'white',
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });
 
