@@ -266,6 +266,7 @@ class Cards extends Component {
 
     return (
       <Animated.View
+        key={index}
         style={[styles.card, style, this.calculateSwipableCardStyle()]}
         {...this.panResponder.panHandlers}
       >
@@ -284,7 +285,7 @@ class Cards extends Component {
     const card = renderCard({ index, data: cardContent });
 
     return (
-      <Animated.View style={[styles.card, style, { opacity: fadeAnim, zIndex: 1 }]}>
+      <Animated.View key={index} style={[styles.card, style, { opacity: fadeAnim, zIndex: 1 }]}>
         {null}
         {card}
       </Animated.View>

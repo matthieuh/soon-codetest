@@ -51,8 +51,6 @@ class Card extends Component {
     this.state = {
       bgImage: props.bgImage,
     };
-
-    this.imageRendering = this.renderImage(props.idx);
   }
 
   renderImage = key => (
@@ -60,7 +58,7 @@ class Card extends Component {
       key={key}
       style={styles.bgImage}
       resizeMode="contain"
-      source={{ uri: `${this.state.bgImage}/500x500` }}
+      source={{ uri: `${this.state.bgImage}/500x500?sig=${key}` }}
     />
   );
 
