@@ -12,7 +12,8 @@ const styles = StyleSheet.create({
   },
   h1: {
     fontSize: 36,
-    marginLeft: 20,
+    color: '#202024',
+    marginLeft: 10,
   },
   actions: {
     flexDirection: 'row',
