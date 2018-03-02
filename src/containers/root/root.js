@@ -70,10 +70,10 @@ class Root extends Component {
     switch (actionType) {
       case 'like':
       case 'setVisited':
-        this.cardSwiper.swipeRight();
+        this.cardSwiper.swipeRight(true);
         break;
       case 'dislike':
-        this.cardSwiper.swipeLeft();
+        this.cardSwiper.swipeLeft(true);
         break;
       default:
         break;
@@ -121,8 +121,8 @@ class Root extends Component {
               }}
               data={items}
               onSwipe={this.props.setCurrentItem}
-              onSwipeLeft={() => this.action('dislike')}
-              onSwipeRight={() => this.action('like')}
+              onSwipeLeft={this.action('dislike')}
+              onSwipeRight={this.action('like')}
               renderCard={({ data, index }) => <Card idx={index} {...data} />}
             />
           </View>

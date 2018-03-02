@@ -76,7 +76,7 @@ class Card extends Component {
           {title && <Text style={styles.text}>{title}</Text>}
           {description && <Text style={styles.text}>Description: {description}</Text>}
           {status && <Text style={styles.text}>Status: {status}</Text>}
-          {!visited && <Text style={styles.text}>First date 🤗</Text>}
+          {visited !== true && <Text style={styles.text}>First date 🤗</Text>}
         </View>
       </View>
     );

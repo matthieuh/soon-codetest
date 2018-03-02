@@ -135,6 +135,8 @@ class Cards extends Component {
     const { onSwipeLeft, onSwipeRight } = this.props;
     const { isSwipingLeft, isSwipingRight } = Cards.getSwipeDirection(animatedValueX);
 
+    console.log('isSwipingLeft, isSwipingRight', isSwipingLeft, isSwipingRight);
+
     if (isSwipingRight) {
       return onSwipeRight;
     }
@@ -150,7 +152,7 @@ class Cards extends Component {
     }
   };
 
-  incrementCardIndex = (onSwipe) => {
+  incrementCardIndex = (onSwipe = () => {}) => {
     const { currentCard } = this.state;
     let newCard = currentCard + 1;
 
@@ -162,24 +164,19 @@ class Cards extends Component {
     this.setNextCard(newCard);
   };
 
-  swipeLeft = (mustDecrementCardIndex = false) => {
+  swipeLeft = (noEvent) => {
     this.zoomNextCard();
 
-    this.swipeCard(this.props.onSwipeLeft, -width / 4, 0, mustDecrementCardIndex);
+    this.swipeCard(this.props.onSwipeLeft, -width / 4, 0, noEvent);
   };
 
-  swipeRight = (mustDecrementCardIndex = false) => {
+  swipeRight = (noEvent) => {
     this.zoomNextCard();
 
-    this.swipeCard(this.props.onSwipeRight, width / 4, 0, mustDecrementCardIndex);
+    this.swipeCard(this.props.onSwipeRight, width / 4, 0, noEvent);
   };
 
-  swipeCard = (
-    onSwipe,
-    x = this.animatedValueX,
-    y = this.animatedValueY,
-    mustDecrementCardIndex = false,
-  ) => {
+  swipeCard = (onSwipe, x = this.animatedValueX, y = this.animatedValueY, noEvent = false) => {
     Animated.timing(this.state.pan, {
       toValue: {
         x: x * 4.5,
@@ -187,7 +184,7 @@ class Cards extends Component {
       },
       duration: 350,
     }).start(() => {
-      mustDecrementCardIndex ? this.decrementCardIndex(onSwipe) : this.incrementCardIndex(onSwipe);
+      noEvent ? this.incrementCardIndex() : this.incrementCardIndex(onSwipe);
     });
   };
 
