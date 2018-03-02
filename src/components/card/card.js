@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 const styles = StyleSheet.create({
   container: {
@@ -55,20 +56,12 @@ const defaultProps = {
 };
 
 class Card extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      bgImage: props.image,
-    };
-  }
-
   renderImage = key => (
-    <Image
+    <FastImage
       key={key}
       style={styles.bgImage}
       resizeMode="contain"
-      source={{ uri: `${this.state.bgImage}/500x500?sig=${key}` }}
+      source={{ uri: `${this.props.image}/500x500?sig=${this.props.idx}` }}
     />
   );
 

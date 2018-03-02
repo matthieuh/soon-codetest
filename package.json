@@ -24,8 +24,7 @@
     "react-test-renderer": "16.2.0"
   },
   "scripts": {
-    "lint":
-      "eslint --cache --ignore-path .gitignore --format=node_modules/eslint-formatter-pretty . ",
+    "lint": "eslint --cache --ignore-path .gitignore --format=node_modules/eslint-formatter-pretty . ",
     "start": "react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
@@ -41,6 +40,7 @@
     "prop-types": "^15.6.0",
     "react": "16.2.0",
     "react-native": "0.52.0",
+    "react-native-fast-image": "^2.2.5",
     "react-native-safe-area-view": "^0.7.0",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",
