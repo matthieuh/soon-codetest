@@ -121,8 +121,8 @@ class Root extends Component {
               }}
               data={items}
               onSwipe={this.props.setCurrentItem}
-              onSwipeLeft={this.action('dislike')}
-              onSwipeRight={this.action('like')}
+              onSwipeLeft={this.action('setVisited')}
+              onSwipeRight={this.action('setVisited')}
               renderCard={({ data, index }) => <Card idx={index} {...data} />}
             />
           </View>

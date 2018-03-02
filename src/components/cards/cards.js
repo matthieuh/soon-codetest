@@ -112,8 +112,8 @@ class Cards extends Component {
   };
 
   onSwipeCallbacks = (swipeDirectionCallback, newCard) => {
-    this.props.onSwipe(newCard);
     swipeDirectionCallback(newCard);
+    this.props.onSwipe(newCard);
   };
 
   setNextCard = (newCard) => {
@@ -134,8 +134,6 @@ class Cards extends Component {
   getOnSwipeDirectionCallback = (animatedValueX) => {
     const { onSwipeLeft, onSwipeRight } = this.props;
     const { isSwipingLeft, isSwipingRight } = Cards.getSwipeDirection(animatedValueX);
-
-    console.log('isSwipingLeft, isSwipingRight', isSwipingLeft, isSwipingRight);
 
     if (isSwipingRight) {
       return onSwipeRight;
