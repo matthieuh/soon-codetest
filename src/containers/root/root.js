@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, Text } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import SafeAreaView from 'react-native-safe-area-view';
@@ -12,8 +12,8 @@ import {
   setCurrentItem,
   like,
   dislike,
-  done,
-} from '../../redux/modules/item';
+  setVisited,
+} from '../../redux/modules/items';
 
 import Cards from '../../components/cards';
 import Card from '../../components/card';
@@ -42,7 +42,7 @@ const mapDispatchToProps = dispatch =>
       setCurrentItem,
       like,
       dislike,
-      done,
+      setVisited,
     },
     dispatch,
   );
@@ -52,6 +52,7 @@ class Root extends Component {
     fetchItems: PropTypes.func.isRequired,
     items: PropTypes.arrayOf(cardPropTypes),
     currentItem: PropTypes.number.isRequired,
+    setCurrentItem: PropTypes.func.isRequired,
   };
   static defaultProps = {
     items: [],
@@ -61,35 +62,70 @@ class Root extends Component {
     this.props.fetchItems();
   }
 
-  action = actionType => () => this.props[actionType](this.props.currentItem);
+  action = actionType => () =>
+    this.props[actionType] && this.props[actionType](this.props.currentItem);
+
+  handleActionButtonPress = actionType => async () => {
+    await this.action(actionType)();
+    switch (actionType) {
+      case 'like':
+      case 'setVisited':
+        this.cardSwiper.swipeRight();
+        break;
+      case 'dislike':
+        this.cardSwiper.swipeLeft();
+        break;
+      default:
+        break;
+    }
+  };
 
   renderActions = () => (
     <View style={styles.actions}>
-      <CircleButton icon={dislikeIcon} style={styles.action} onPress={this.action('dislike')} />
-      <CircleButton icon={doneIcon} style={styles.action} small onPress={this.action('done')} />
-      <CircleButton icon={likeIcon} style={styles.action} onPress={this.action('like')} />
+      <CircleButton
+        icon={dislikeIcon}
+        style={styles.action}
+        onPress={this.handleActionButtonPress('dislike')}
+      />
+      <CircleButton
+        icon={doneIcon}
+        style={styles.action}
+        onPress={this.handleActionButtonPress('setVisited')}
+        small
+      />
+      <CircleButton
+        icon={likeIcon}
+        style={styles.action}
+        onPress={this.handleActionButtonPress('like')}
+      />
     </View>
   );
 
   render() {
-    const { items, currentItem } = this.props;
+    const { items } = this.props;
+
     return (
       <View style={styles.container}>
         <SafeAreaView style={styles.content}>
           <Text style={styles.h1}>Explore</Text>
-          <Cards
-            data={items}
-            onSwipe={this.props.setCurrentItem}
-            onSwipeRight={() => this.action('done')}
-            renderCard={({ data, index }) => (
-              <Card
-                idx={index}
-                title={data.title}
-                description={data.description}
-                bgImage={data.image}
-              />
-            )}
-          />
+          <View>
+            <TouchableOpacity
+              style={{ alignSelf: 'center', marginBottom: 10 }}
+              onPress={() => this.cardSwiper.jumpToCard(0)}
+            >
+              <Text style={{ color: '#007AFF' }}>Back to first card</Text>
+            </TouchableOpacity>
+            <Cards
+              ref={(cardSwiper) => {
+                this.cardSwiper = cardSwiper;
+              }}
+              data={items}
+              onSwipe={this.props.setCurrentItem}
+              onSwipeLeft={() => this.action('dislike')}
+              onSwipeRight={() => this.action('like')}
+              renderCard={({ data, index }) => <Card idx={index} {...data} />}
+            />
+          </View>
           {this.renderActions()}
         </SafeAreaView>
       </View>

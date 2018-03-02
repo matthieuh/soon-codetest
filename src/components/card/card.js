@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
-
-const { width } = Dimensions.get('window');
+import { View, Text, Image, StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
   container: {
@@ -14,6 +12,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 11 },
     shadowOpacity: 0.3,
     shadowRadius: 16,
+    justifyContent: 'flex-end',
   },
   bgImageContainer: {
     position: 'absolute',
@@ -28,7 +27,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 40,
+    marginBottom: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   text: {
     color: 'white',
@@ -37,19 +39,27 @@ const styles = StyleSheet.create({
 
 const propTypes = {
   idx: PropTypes.number.isRequired,
-  title: PropTypes.string.isRequired,
-  description: PropTypes.string.isRequired,
-  bgImage: PropTypes.string.isRequired,
+  title: PropTypes.string,
+  description: PropTypes.string,
+  image: PropTypes.string,
+  status: PropTypes.string,
+  visited: PropTypes.bool,
 };
 
-const defaultProps = {};
+const defaultProps = {
+  title: null,
+  description: null,
+  image: null,
+  status: null,
+  visited: null,
+};
 
 class Card extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      bgImage: props.bgImage,
+      bgImage: props.image,
     };
   }
 
@@ -63,13 +73,17 @@ class Card extends Component {
   );
 
   render() {
-    const { idx, title, description } = this.props;
+    const {
+      idx, title, description, image, status, visited,
+    } = this.props;
     return (
       <View style={styles.container}>
-        <View style={styles.bgImageContainer}>{this.renderImage(idx)}</View>
+        {image && <View style={styles.bgImageContainer}>{this.renderImage(idx)}</View>}
         <View style={styles.content}>
-          <Text style={styles.text}>Title: {title}</Text>
-          <Text style={styles.text}>Description: {description}</Text>
+          {title && <Text style={styles.text}>{title}</Text>}
+          {description && <Text style={styles.text}>Description: {description}</Text>}
+          {status && <Text style={styles.text}>Status: {status}</Text>}
+          {!visited && <Text style={styles.text}>First date 🤗</Text>}
         </View>
       </View>
     );

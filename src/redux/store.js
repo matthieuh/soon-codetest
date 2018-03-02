@@ -1,12 +1,12 @@
 import { compose, createStore, applyMiddleware, combineReducers } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 
-import item from './modules/item';
+import items from './modules/items';
 
 const middlewares = [thunkMiddleware];
 
 const reducer = combineReducers({
-  item,
+  items,
 });
 
 const store = compose(

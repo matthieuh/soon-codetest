@@ -1,7 +1,6 @@
 // inspiration:
 // https://github.com/GeekyAnts/NativeBase/blob/5fa8e12869e2109f08220071e78b9a6f91874c5d/src/basic/DeckSwiper.js
-// and https://github.com/alexbrillant/react-native-deck-swiper/blob/master/Swiper.js
-// With some simplifications around gestures
+// With some simplifications around gestures and fixing image flickering
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -112,9 +111,9 @@ class Cards extends Component {
     }
   };
 
-  onSwipeCallbacks = (swipeDirectionCallback) => {
-    this.props.onSwipe(this.state.currentCard);
-    swipeDirectionCallback(this.state.currentCard);
+  onSwipeCallbacks = (swipeDirectionCallback, newCard) => {
+    this.props.onSwipe(newCard);
+    swipeDirectionCallback(newCard);
   };
 
   setNextCard = (newCard) => {
@@ -125,6 +124,11 @@ class Cards extends Component {
       },
       this.resetPanAndScale,
     );
+  };
+
+  setCardSize = ({ nativeEvent }) => {
+    const { width: cardSize } = nativeEvent.layout;
+    this.setState({ cardSize });
   };
 
   getOnSwipeDirectionCallback = (animatedValueX) => {
@@ -140,6 +144,12 @@ class Cards extends Component {
     }
   };
 
+  jumpToCard = (newCard) => {
+    if (this.props.data[newCard]) {
+      this.setNextCard(newCard, false);
+    }
+  };
+
   incrementCardIndex = (onSwipe) => {
     const { currentCard } = this.state;
     let newCard = currentCard + 1;
@@ -148,11 +158,28 @@ class Cards extends Component {
       newCard = 0;
     }
 
-    this.onSwipeCallbacks(onSwipe);
+    this.onSwipeCallbacks(onSwipe, newCard);
     this.setNextCard(newCard);
   };
 
-  swipeCard = (onSwipe, x = this.animatedValueX, y = this.animatedValueY) => {
+  swipeLeft = (mustDecrementCardIndex = false) => {
+    this.zoomNextCard();
+
+    this.swipeCard(this.props.onSwipeLeft, -width / 4, 0, mustDecrementCardIndex);
+  };
+
+  swipeRight = (mustDecrementCardIndex = false) => {
+    this.zoomNextCard();
+
+    this.swipeCard(this.props.onSwipeRight, width / 4, 0, mustDecrementCardIndex);
+  };
+
+  swipeCard = (
+    onSwipe,
+    x = this.animatedValueX,
+    y = this.animatedValueY,
+    mustDecrementCardIndex = false,
+  ) => {
     Animated.timing(this.state.pan, {
       toValue: {
         x: x * 4.5,
@@ -160,7 +187,7 @@ class Cards extends Component {
       },
       duration: 350,
     }).start(() => {
-      this.incrementCardIndex(onSwipe);
+      mustDecrementCardIndex ? this.decrementCardIndex(onSwipe) : this.incrementCardIndex(onSwipe);
     });
   };
 
@@ -233,11 +260,6 @@ class Cards extends Component {
       outputRange: ['-10deg', '0deg', '10deg'],
     });
 
-  setCardSize = ({ nativeEvent }) => {
-    const { width: cardSize } = nativeEvent.layout;
-    this.setState({ cardSize });
-  };
-
   calculateSwipableCardStyle = () => {
     const opacity = this.props.animateCardOpacity ? this.interpolateCardOpacity() : 1;
     const rotation = this.interpolateRotation();
@@ -270,7 +292,6 @@ class Cards extends Component {
         style={[styles.card, style, this.calculateSwipableCardStyle()]}
         {...this.panResponder.panHandlers}
       >
-        {null}
         {card}
       </Animated.View>
     );
@@ -286,7 +307,6 @@ class Cards extends Component {
 
     return (
       <Animated.View key={index} style={[styles.card, style, { opacity: fadeAnim, zIndex: 1 }]}>
-        {null}
         {card}
       </Animated.View>
     );

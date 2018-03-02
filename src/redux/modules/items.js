@@ -10,7 +10,7 @@ async function wait(ttw = 500) {
 export const setCurrentItem = createAction('SET_CURRENT');
 export const like = createAction('LIKE');
 export const dislike = createAction('DISLIKE');
-export const done = createAction('DONE');
+export const setVisited = createAction('SET_VISITED');
 
 const FETCH_REQUEST = 'item/FETCH_REQUEST';
 const FETCH_RECEIVE = 'item/FETCH_RECEIVE';
@@ -21,7 +21,7 @@ export const fetchItems = () => async (dispatch) => {
 
   try {
     await wait();
-    dispatch({ type: FETCH_RECEIVE, items: itemsData });
+    dispatch({ type: FETCH_RECEIVE, data: itemsData });
   } catch (error) {
     dispatch({ type: FETCH_FAILURE, error });
   }
@@ -29,7 +29,7 @@ export const fetchItems = () => async (dispatch) => {
 
 // State
 const initialState = {
-  items: [],
+  data: [],
   loading: false,
   error: false,
   current: 0,
@@ -45,13 +45,13 @@ export default handleActions(
     }),
     [FETCH_RECEIVE]: (state, action) => ({
       ...state,
-      items: action.items,
+      data: action.data,
       loading: false,
       error: false,
     }),
     [FETCH_FAILURE]: (state, action) => ({
       ...state,
-      items: [],
+      data: [],
       loading: false,
       error: action.error,
     }),
@@ -61,20 +61,20 @@ export default handleActions(
     }),
     LIKE: (state, action) => ({
       ...state,
-      items: state.items.map((item, idx) => (idx === action.payload ? { ...item, liked: true } : item)),
+      data: state.data.map((item, idx) => (idx === action.payload ? { ...item, visited: true, status: '💖' } : item)),
     }),
     DISLIKE: (state, action) => ({
       ...state,
-      items: state.items.map((item, idx) => (idx === action.payload ? { ...item, liked: false } : item)),
+      data: state.data.map((item, idx) => (idx === action.payload ? { ...item, visited: true, status: '💔' } : item)),
     }),
-    DONE: (state, action) => ({
+    SET_VISITED: (state, action) => ({
       ...state,
-      items: state.items.map((item, idx) => (idx === action.payload ? { ...item, skipped: true } : item)),
+      data: state.data.map((item, idx) => (idx === action.payload ? { ...item, visited: true } : item)),
     }),
   },
   initialState,
 );
 
 // Selectors
-export const getItems = ({ item }) => item.items;
-export const getCurrentItem = ({ item }) => item.current;
+export const getItems = ({ items }) => items.data;
+export const getCurrentItem = ({ items }) => items.current;
